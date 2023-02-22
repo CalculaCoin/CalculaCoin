@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Courbe du Bitcoin en temps réel (en euros)</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+</head>
+<body>
+	<h1>Courbe du Bitcoin en temps réel (en euros)</h1>
+	<div style="width: 550px;">
+		<canvas id="myChart"></canvas>
+	</div>
+
+	<script>
+		// Récupération des données de l'API de Binance
+		function getChartData() {
+			fetch('https://api.binance.com/api/v3/klines?symbol=BTCEUR&interval=1m')
+			.then(response => response.json())
+			.then(data => {
+				// Traitement des données
+				var labels = [];
+				var prices = [];
+				data.forEach(candle => {
+					labels.push(new Date(candle[0]).toLocaleTimeString());
+					prices.push(parseFloat(candle[4]));
+				});
+
+				// Configuration du graphique
+				var data = {
+					labels: labels,
+					datasets: [{
+						label: 'Prix du Bitcoin (en euros)',
+						data: prices,
+						borderColor: 'blue',
+						fill: false
+					}]
+				};
+
+				var options = {
+					responsive: true,
+					title: {
+						display: true,
+						text: 'Prix du Bitcoin en temps réel (en euros)'
+					},
+					scales: {
+						yAxes: [{
+							ticks: {
+								beginAtZero: false
+							}
+						}]
+					}
+				};
+
+				// Création du graphique
+				var ctx = document.getElementById('myChart').getContext('2d');
+				var myChart = new Chart(ctx, {
+					type: 'line',
+					data: data,
+					options: options
+				});
+			})
+			.catch(error => console.log(error));
+		}
+
+		// Mise à jour des données toutes les 5 secondes
+		setInterval(() => {
+			getChartData();
+		}, 5000);
+
+		// Initialisation du graphique
+		getChartData();
+	</script>
+</body>
+</html>
